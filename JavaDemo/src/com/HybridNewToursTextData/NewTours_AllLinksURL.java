@@ -1,0 +1,73 @@
+package com.HybridNewToursTextData;
+
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+public class NewTours_AllLinksURL 
+{
+	FirefoxDriver driver;
+	@BeforeTest
+	public void setup()
+	{
+		driver= new FirefoxDriver();
+		driver.get("http://newtours.demoaut.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+	}
+	@Test
+	public void NewtoursAllURL() throws IOException, InterruptedException
+	{
+		FileInputStream file = new FileInputStream("G:\\Selenium\\ProgrmsPrcties\\JavaDemo\\src\\com\\ExcelBackup\\TestAU2.xlsx");
+		XSSFWorkbook workBook = new XSSFWorkbook(file);
+		XSSFSheet Sheet = workBook.getSheet("Sheet1");
+		int rowcount= Sheet.getLastRowNum();
+		
+		for(int i=1;i<=rowcount;i++)
+		{
+			
+			Row r = Sheet.getRow(i);
+			//Thread.sleep(5000);
+			WebElement linkNames = driver.findElement(By.linkText(r.getCell(0).getStringCellValue()));
+			String LName=linkNames.getAttribute("href");
+			linkNames.click();
+			String actulaURL=driver.getCurrentUrl();
+			r.createCell(2).setCellValue(actulaURL);
+			System.out.println(actulaURL);
+			
+			System.out.println(LName);
+			r.createCell(1).setCellValue(LName);
+			if(actulaURL.contains(LName))
+			{
+				r.createCell(3).setCellValue("URL is Matched--PASS");
+				System.out.println("URL is Matched--PASS");
+			}
+				else
+				{
+					r.createCell(3).setCellValue("URL is Not Matched--Fail");
+					System.out.println("URL is Not Matched--Fail");
+				}
+			driver.navigate().back();	
+			}
+			
+			FileOutputStream file1 = new FileOutputStream("G:\\Selenium\\ProgrmsPrcties\\JavaDemo\\src\\com\\ExcelBackup\\TestAU2.xlsx");
+			workBook.write(file1);
+	}
+	@Test
+	public void tearDown()
+	{
+		driver.close();
+	}
+}
